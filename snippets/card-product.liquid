@@ -13,9 +13,9 @@
     Usage:
     {% render 'card-product', show_vendor: section.settings.show_vendor %}
 {% endcomment %}
-
+<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
 {{ 'component-rating.css' | asset_url | stylesheet_tag }}
-
+{%- assign product_form_id = 'product-form-template--15879450493167__main' -%}
 {%- if card_product and card_product != empty -%}
   {%- liquid
     assign ratio = 1
@@ -134,6 +134,75 @@
             {%- endif -%}
 
             {% render 'price', product: card_product, price_class: '' %}
+            
+            
+            {%- unless card_product.has_only_default_variant -%}
+              
+                <variant-selects class="no-js-hidden" data-section="{{ section.id }}" {{ block.shopify_attributes }}>
+                  {%- for option in card_product.options_with_values -%}
+                    <div class="product-form__input product-form__input--dropdown">
+                      
+                      <div class="select">
+                        <select id="Option-{{ section.id }}-{{ forloop.index0 }}"
+                          class="select__select"
+                          name="options[{{ option.name | escape }}]"
+                          form="{{ product_form_id }}" onChange="window.location.href=this.value"
+                        >
+                          <option value="" disabled selected>SELECT OPTIONS</option>
+                          {% for variant in card_product.variants %}
+      <option value="{{ variant.url }}">{{ variant.title }}</option>
+    {% endfor%}
+                        </select>
+                        {% render 'icon-caret' %}
+                      </div>
+                    </div>
+                  {%- endfor -%}
+
+                  <script type="application/json">
+                    {{ product.variants | json }}
+                  </script>
+                </variant-selects>
+            {%- endunless -%}
+
+            <noscript class="product-form__noscript-wrapper-{{ section.id }}">
+              <div class="product-form__input{% if card_product.has_only_default_variant %} hidden{% endif %}">
+                <label class="form__label" for="Variants-{{ section.id }}">{{ 'products.product.product_variants' | t }}</label>
+                <div class="select">
+                  <select name="id" id="Variants-{{ section.id }}" class="select__select" form="{{ product_form_id }}">
+                    {%- for variant in card_product.variants -%}
+                      <option
+                        {% if variant == card_product.selected_or_first_available_variant %}selected="selected"{% endif %}
+                        {% if variant.available == false %}disabled{% endif %}
+                        value="{{ variant.id }}"
+                      >
+                        
+                        {%- if variant.available == false %} - {{ 'products.product.sold_out' | t }}{% endif %}
+                        - {{ variant.price | money | strip_html }}
+                      </option>
+                    {%- endfor -%}
+                  </select>
+                  {% render 'icon-caret' %}
+                </div>
+              </div>
+            </noscript>
+            
+            {%- if card_product.has_only_default_variant -%}
+            <product-form class="product-form">
+                <div class="product-form__error-message-wrapper" role="alert" hidden="">
+                 
+                  <span class="product-form__error-message"></span>
+                </div><form method="post" action="/cart/add" id="{{ product_form_id }}" accept-charset="UTF-8" class="form" enctype="multipart/form-data" novalidate="novalidate" data-type="add-to-cart-form"><input type="hidden" name="form_type" value="product"><input type="hidden" name="utf8" value="✓"><input type="hidden" name="id" value="{{ card_product.selected_or_first_available_variant.id }}">
+                  <div class="product-form__buttons">
+                    <button type="submit" name="add" class="product-form__submit button button--full-width button--secondary">
+                        <span> {{ 'products.product.add_to_cart' | t }}</span>
+                        <div class="loading-overlay__spinner hidden">
+                          <svg aria-hidden="true" focusable="false" role="presentation" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                            <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+                          </svg>
+                        </div>
+                    </button>
+</div></form></product-form>{% endif %}
+            
           </div>
         </div>
         <div class="card__badge {{ settings.badge_position }}">
@@ -186,3 +255,8 @@
     </div>
   </div>
 {%- endif -%}
+
+ <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+ 
+ 
+ 

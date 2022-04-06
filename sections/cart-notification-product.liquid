@@ -13,7 +13,7 @@
         </div>
       {%- endif -%}
       <div>
-        <h3 class="cart-notification-product__name h4">{{ item.product.title | escape }}</h3>
+        <h3 class="cart-notification-product__name h4">You have added {{ item.product.title | escape }} to your shopping Cart!</h3>
           <dl>
             {%- unless item.product.has_only_default_variant -%}
               {%- for option in item.options_with_values -%}
@@ -48,3 +48,4 @@
     </div>
   {%- endfor -%}
 {%- endif -%}
+
